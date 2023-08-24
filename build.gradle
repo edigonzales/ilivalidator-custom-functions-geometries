@@ -1,0 +1,90 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "de.undercouch.download" version "4.1.2"
+}
+
+apply from: "$rootDir/gradle/versioning.gradle"
+
+group = 'io.github.sogis'
+
+
+import java.nio.file.Paths
+import de.undercouch.gradle.tasks.download.Download
+
+def pathToTempFolder = System.getProperty("java.io.tmpdir")
+def pathToUnzipFolder = Paths.get("src", "main", "resources")
+def themePublications = ["ch.so.agi.av.hoheitsgrenzen"]
+
+themePublications.each { themePublication ->
+
+    tasks.register("download_$themePublication", Download) {
+        src "https://files.geo.so.ch/" + themePublication + "/aktuell/" + themePublication + ".xtf.zip"
+        dest pathToTempFolder
+        overwrite true
+
+        doLast {
+            println "File downloaded to: " + pathToTempFolder
+        }        
+    }
+
+    tasks.register("unzip_$themePublication", Copy) {
+        dependsOn "download_$themePublication"
+        from zipTree(Paths.get(pathToTempFolder, themePublication + ".xtf.zip"))
+        into file(pathToUnzipFolder)
+        include "**/*.xtf"
+
+        doLast {
+            println "File unzipped to directory: " + pathToUnzipFolder
+        }    
+    }
+}
+
+tasks.register ("sourcesJar", Jar) {
+    dependsOn "classes"
+    baseName project.archivesBaseName
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+tasks.register("javadocJar", Jar) {
+    dependsOn "javadoc"
+    baseName project.archivesBaseName
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+
+tasks.register("fubar") {
+
+    doLast {
+        println("fubar")
+    }
+}
+
+
+/*
+plugins {
+    id 'java-library'
+}
+*/
+
+/*
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    api 'org.apache.commons:commons-math3:3.6.1'
+
+    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    implementation 'com.google.guava:guava:31.1-jre'
+}
+*/
+
+/*
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
+*/
