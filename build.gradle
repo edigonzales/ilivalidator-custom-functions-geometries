@@ -1,13 +1,14 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
+    id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
     id "de.undercouch.download" version "4.1.2"
 }
 
 apply from: "$rootDir/gradle/versioning.gradle"
 
 group = 'io.github.sogis'
-
 
 import java.nio.file.Paths
 import de.undercouch.gradle.tasks.download.Download
@@ -40,6 +41,13 @@ themePublications.each { themePublication ->
     }
 }
 
+tasks.register("downloadData") {
+    description = "Aggregationstask für das Herunterladen und Entpacken der gewünschten XTF-Dateien."
+    dependsOn {
+        tasks.findAll { task -> task.name.startsWith('download_') }
+    }    
+}
+
 tasks.register ("sourcesJar", Jar) {
     dependsOn "classes"
     baseName project.archivesBaseName
@@ -56,13 +64,55 @@ tasks.register("javadocJar", Jar) {
 }
 
 
-tasks.register("fubar") {
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId = group
+            artifactId = project.archivesBaseName
 
-    doLast {
-        println("fubar")
+            pom {
+                name = "ilivalidator-custom-functions-geometries"
+                url = "https://github.com/edigonzales/ilivalidator-custom-functions-geometries"
+                description = "Geometries for IsInsideExternalDataset validator function."
+                scm {
+                    connection = "scm:git:https@github.com/edigonzales/ilivalidator-custom-functions-geometries"
+                    developerConnection = "scm:git:https@github.com/edigonzales/ilivalidator-custom-functions-geometries"
+                    url = "https://github.com/edigonzales/ilivalidator-custom-functions-geometries"
+                }
+                licenses {
+                    license {
+                        name = "MIT"
+                        url = "https://github.com/edigonzales/ilivalidator-custom-functions-geometries/blob/master/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "edigonzales"
+                        name = "Stefan Ziegler"
+                    }
+                }
+            }
+        }
     }
 }
 
+signing {
+    sign publishing.publications.mavenJava
+}
+
+nexusPublishing {
+    repositories {
+        sonatype { 
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+            password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+        }
+    }
+}
 
 /*
 plugins {
