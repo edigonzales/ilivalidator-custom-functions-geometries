@@ -41,7 +41,7 @@ themePublications.each { themePublication ->
     }
 }
 
-tasks.register("downloadData") {
+tasks.register("prepareData") {
     description = "Aggregationstask für das Herunterladen und Entpacken der gewünschten XTF-Dateien."
     dependsOn {
         tasks.findAll { task -> task.name.startsWith('download_') }
@@ -62,7 +62,6 @@ tasks.register("javadocJar", Jar) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
-
 
 publishing {
     publications {
