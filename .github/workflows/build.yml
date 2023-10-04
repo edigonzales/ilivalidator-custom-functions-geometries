@@ -21,7 +21,7 @@ jobs:
           
       - name: Build
         run: |
-          ./gradlew clean prepareData build jar sourcesJar javadocJar
+          ./gradlew clean prepareData build jar sourcesJar javadocJar -i
           ls -la build/libs
           ls -la src/main/resources
  
