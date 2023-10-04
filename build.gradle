@@ -20,7 +20,8 @@ def themePublications = ["ch.so.agi.av.hoheitsgrenzen"]
 themePublications.each { themePublication ->
 
     tasks.register("download_$themePublication", Download) {
-        src "https://files.geo.so.ch/" + themePublication + "/aktuell/" + themePublication + ".xtf.zip"
+        //src "https://files.geo.so.ch/" + themePublication + "/aktuell/" + themePublication + ".xtf.zip"
+        src "https://s3.eu-central-1.amazonaws.com/ch.so.agi.geodata-dev/" + themePublication + ".xtf.zip"
         dest pathToTempFolder
         overwrite true
 
