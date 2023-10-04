@@ -45,7 +45,7 @@ themePublications.each { themePublication ->
 tasks.register("prepareData") {
     description = "Aggregationstask für das Herunterladen und Entpacken der gewünschten XTF-Dateien."
     dependsOn {
-        tasks.findAll { task -> task.name.startsWith('download_') }
+        tasks.findAll { task -> task.name.startsWith('unzip_') }
     }    
 }
 
